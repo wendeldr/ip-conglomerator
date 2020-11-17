@@ -6,25 +6,17 @@ import sys
 import socket
 import selectors
 import traceback
-
+import uuid 
 import libclient
 
 sel = selectors.DefaultSelector()
 
-
 def create_request(action, value):
-    if action == "search":
-        return dict(
-            type="text/json",
-            encoding="utf-8",
-            content=dict(action=action, value=value),
-        )
-    else:
-        return dict(
-            type="binary/custom-client-binary-type",
-            encoding="binary",
-            content=bytes(action + value, encoding="utf-8"),
-        )
+    return dict(
+        type="text/json",
+        encoding="utf-8",
+        content=dict(mac=socket.gethostname(), value=hex(uuid.getnode())),
+    )
 
 
 def start_connection(host, port, request):
