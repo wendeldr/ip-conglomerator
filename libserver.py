@@ -6,26 +6,23 @@ import struct
 from pathlib import Path
 import os, codecs
 
-def encrypt(plaintext, key):
-	print ("[+] -------- Encryption --------")
-	print ("[+] Key: "+str(codecs.encode(key, 'hex')))
-	encrypted = ""
+import base64
 
-	for i in range(len(plaintext)):
-		c = ord(plaintext[i]) ^ key[i]
-		d = "{:02x}".format(c)
-		#print ("i:"+str(i)+" P: "+str(plaintext[i])+" K: "+str(key[i])+" C:"+str(c)+" D:"+str(d))
-		encrypted += d
-
-	print ("[+] Encrypted string: "+encrypted)
-	return encrypted
+def encode(key, string):
+    encoded_chars = []
+    for i in range(len(string)):
+        key_c = key[i % len(key)]
+        encoded_c = chr(ord(string[i]) + ord(key_c) % 256)
+        encoded_chars.append(encoded_c)
+    encoded_string = ''.join(encoded_chars)
+    return encoded_string
 
 path_to_db = Path('/home/dan/Documents/ips')
 path_to_db.mkdir(parents=True, exist_ok=True)
-otp = 'apiuh2trf9q328ta089ofhnq23olputfbnepoa8iuhfnoq3pw84uvbnq389opun3qp098unhesap9ohunjoai8w4bfq3p8iufyhbnsd8iuhbae9o8ew4h9o83qa7hbnq39o8inbq329o8bnlou8ibn'
 
 class Message:
-    def __init__(self, selector, sock, addr):
+    def __init__(self, key, selector, sock, addr):
+        self.key = key
         self.selector = selector
         self.sock = sock
         self.addr = addr
@@ -63,7 +60,7 @@ class Message:
 
     def _write(self):
         if self._send_buffer:
-            print("sending", repr(self._send_buffer), "to", self.addr)
+            # print("sending", repr(self._send_buffer), "to", self.addr)
             try:
                 # Should be ready to write
                 sent = self.sock.send(self._send_buffer)
@@ -110,11 +107,11 @@ class Message:
             for x in path_to_db.iterdir():
                 with open(x) as f:
                     results.append([f.read()])
-            content = {"result": encrypt(str(results), otp)}
+            content = {"result": encode(self.key, str(results))}
         elif action == "update":
             with open(path_to_db.joinpath(self.request['mac']),'w') as f:
                 f.write(f"{self.request['mac']},{self.request['hostname']},{self.request['ip']},{self.addr[0]},{self.addr[1]}")
-            a=1
+            content = {"result": ''}
         else:
             content = {"result": f'Error: invalid action "{action}".'}
         content_encoding = "utf-8"

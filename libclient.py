@@ -3,10 +3,26 @@ import selectors
 import json
 import io
 import struct
+import codecs
+tab = False
+try:
+    from tabulate import tabulate
+    tab = True
+except ImportError as e:
+    pass
 
+def decode(key, string):
+    encoded_chars = []
+    for i in range(len(string)):
+        key_c = key[i % len(key)]
+        encoded_c = chr((ord(string[i]) - ord(key_c) + 256) % 256)
+        encoded_chars.append(encoded_c)
+    encoded_string = ''.join(encoded_chars)
+    return encoded_string
 
 class Message:
-    def __init__(self, selector, sock, addr, request):
+    def __init__(self,key, selector, sock, addr, request):
+        self.key = key
         self.selector = selector
         self.sock = sock
         self.addr = addr
@@ -45,7 +61,7 @@ class Message:
 
     def _write(self):
         if self._send_buffer:
-            print("sending", repr(self._send_buffer), "to", self.addr)
+            # print("sending", repr(self._send_buffer), "to", self.addr)
             try:
                 # Should be ready to write
                 sent = self.sock.send(self._send_buffer)
@@ -83,11 +99,24 @@ class Message:
     def _process_response_json_content(self):
         content = self.response
         result = content.get("result")
-        print(f"got result: {result}")
+        if result == '':
+            print(f"Updated")
+        else:
+            if tab:
+                r = decode(self.key,result)
+                strs = r.replace('[','').split('],')
+                lists = [s.replace(']','').replace("'","").split(',') for s in strs]
+                print(tabulate(lists, headers=["mac", "hostname", "local-ip", "uc-ip", "port"]))
+            else:
+                r = decode(self.key,result)
+                strs = r.replace('[','').split('],')
+                print(str(["mac", "hostname", "local-ip", "uc-ip", "port"]))
+                for x in strs:
+                    print(x)
 
     def _process_response_binary_content(self):
         content = self.response
-        print(f"got response: {repr(content)}")
+        # print(f"got response: {repr(content)}")
 
     def process_events(self, mask):
         if mask & selectors.EVENT_READ:
@@ -194,15 +223,15 @@ class Message:
         if self.jsonheader["content-type"] == "text/json":
             encoding = self.jsonheader["content-encoding"]
             self.response = self._json_decode(data, encoding)
-            print("received response", repr(self.response), "from", self.addr)
+            # print("received response", repr(self.response), "from", self.addr)
             self._process_response_json_content()
         else:
             # Binary or unknown content-type
             self.response = data
-            print(
-                f'received {self.jsonheader["content-type"]} response from',
-                self.addr,
-            )
+            # print(
+            #     f'received {self.jsonheader["content-type"]} response from',
+            #     self.addr,
+            # )
             self._process_response_binary_content()
         # Close when response has been processed
         self.close()

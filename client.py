@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
 #./client.py 127.0.0.1 65432 search needle
-otp = 'apiuh2trf9q328ta089ofhnq23olputfbnepoa8iuhfnoq3pw84uvbnq389opun3qp098unhesap9ohunjoai8w4bfq3p8iufyhbnsd8iuhbae9o8ew4h9o83qa7hbnq39o8inbq329o8bnlou8ibn'
 
+from getmac import get_mac_address
 import sys
 import socket
 import selectors
@@ -18,33 +18,37 @@ def create_request(action='update'):
     return dict(
         type="text/json",
         encoding="utf-8",
-        content=dict(action=action, hostname=hostname, ip=local_ip, mac=hex(uuid.getnode())),
+        content=dict(action=action, hostname=hostname, ip=local_ip, mac=get_mac_address()),
     )
 
 
-def start_connection(host, port, request):
+def start_connection(key, host, port, request):
     addr = (host, port)
     print("starting connection to", addr)
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.setblocking(False)
     sock.connect_ex(addr)
     events = selectors.EVENT_READ | selectors.EVENT_WRITE
-    message = libclient.Message(sel, sock, addr, request)
+    message = libclient.Message(key, sel, sock, addr, request)
     sel.register(sock, events, data=message)
 
 
-if len(sys.argv) < 3 or len(sys.argv) > 5:
-    print("usage:", sys.argv[0], "<host> <port> <optional-action (list)>")
-    sys.exit(1)
+# if len(sys.argv) < 3 or len(sys.argv) > 5:
+#     print("usage:", sys.argv[0], "<host> <port> <optional-action (list)>")
+#     sys.exit(1)
 
 
-host, port = sys.argv[1], int(sys.argv[2])
-if len(sys.argv) == 4:
-    request = create_request(sys.argv[3])
-else:
-    request = create_request()
+# host, port = sys.argv[1], int(sys.argv[2])
+host = '10.97.29.68'
+port = 65432
+request = create_request()
+password = 'mypassword'
+# if len(sys.argv) == 4:
+#     request = create_request(sys.argv[3])
+# else:
+#     request = create_request()
 
-start_connection(host, port, request)
+start_connection(password, host, port, request)
 
 try:
     while True:

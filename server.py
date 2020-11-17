@@ -12,11 +12,11 @@ import libserver
 sel = selectors.DefaultSelector()
 
 
-def accept_wrapper(sock):
+def accept_wrapper(key, sock):
     conn, addr = sock.accept()  # Should be ready to read
     print("accepted connection from", addr)
     conn.setblocking(False)
-    message = libserver.Message(sel, conn, addr)
+    message = libserver.Message(key, sel, conn, addr)
     sel.register(conn, selectors.EVENT_READ, data=message)
 
 
@@ -27,6 +27,7 @@ def accept_wrapper(sock):
 # host, port = sys.argv[1], int(sys.argv[2])
 host = '10.97.29.68'
 port = int(65432)
+password = 'mypassword'
 lsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # Avoid bind() exception: OSError: [Errno 48] Address already in use
 lsock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -41,7 +42,7 @@ try:
         events = sel.select(timeout=None)
         for key, mask in events:
             if key.data is None:
-                accept_wrapper(key.fileobj)
+                accept_wrapper(password,key.fileobj)
             else:
                 message = key.data
                 try:
