@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 #./client.py 127.0.0.1 65432 search needle
+otp = 'apiuh2trf9q328ta089ofhnq23olputfbnepoa8iuhfnoq3pw84uvbnq389opun3qp098unhesap9ohunjoai8w4bfq3p8iufyhbnsd8iuhbae9o8ew4h9o83qa7hbnq39o8inbq329o8bnlou8ibn'
 
 import sys
 import socket
