@@ -11,11 +11,13 @@ import libclient
 
 sel = selectors.DefaultSelector()
 
-def create_request(action, value):
+def create_request(action='update'):
+    hostname = socket.gethostname()
+    local_ip = socket.gethostbyname(hostname)
     return dict(
         type="text/json",
         encoding="utf-8",
-        content=dict(mac=socket.gethostname(), value=hex(uuid.getnode())),
+        content=dict(action=action, hostname=hostname, ip=local_ip, mac=hex(uuid.getnode())),
     )
 
 
@@ -30,17 +32,17 @@ def start_connection(host, port, request):
     sel.register(sock, events, data=message)
 
 
-# if len(sys.argv) != 5:
-#     print("usage:", sys.argv[0], "<host> <port> <action> <value>")
-#     sys.exit(1)
+if len(sys.argv) < 3 or len(sys.argv) > 4:
+    print("usage:", sys.argv[0], "<host> <port> <optional-action (list)>")
+    sys.exit(1)
 
-host = '127.0.0.1'
-port = int('65432')
-action = 'search'
-value = 'needle'
-# host, port = sys.argv[1], int(sys.argv[2])
-# action, value = sys.argv[3], sys.argv[4]
-request = create_request(action, value)
+
+host, port = sys.argv[1], int(sys.argv[2])
+if len(sys.argv) == 3:
+    request = create_request(sys.argv[3])
+else:
+    request = create_request()
+
 start_connection(host, port, request)
 
 try:

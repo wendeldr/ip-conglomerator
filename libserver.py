@@ -90,10 +90,12 @@ class Message:
 
     def _create_response_json_content(self):
         action = self.request.get("action")
-        if action == "search":
+        if action == "list":
             query = self.request.get("value")
             answer = request_search.get(query) or f'No match for "{query}".'
             content = {"result": answer}
+        elif action == "update":
+            a=1
         else:
             content = {"result": f'Error: invalid action "{action}".'}
         content_encoding = "utf-8"
