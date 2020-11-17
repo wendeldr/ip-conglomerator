@@ -33,20 +33,17 @@ def start_connection(key, host, port, request):
     sel.register(sock, events, data=message)
 
 
-# if len(sys.argv) < 3 or len(sys.argv) > 5:
-#     print("usage:", sys.argv[0], "<host> <port> <optional-action (list)>")
-#     sys.exit(1)
+if len(sys.argv) < 3 or len(sys.argv) > 6:
+    print("usage:", sys.argv[0], "<host> <port> <password> <optional-action (list)>")
+    sys.exit(1)
 
 
-# host, port = sys.argv[1], int(sys.argv[2])
-host = '10.97.29.68'
-port = 65432
-request = create_request()
-password = 'mypassword'
-# if len(sys.argv) == 4:
-#     request = create_request(sys.argv[3])
-# else:
-#     request = create_request()
+host, port, password = sys.argv[1], int(sys.argv[2]), sys.argv[3]
+print(password)
+if len(sys.argv) == 5:
+    request = create_request(sys.argv[4])
+else:
+    request = create_request()
 
 start_connection(password, host, port, request)
 
