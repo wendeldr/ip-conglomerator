@@ -106,11 +106,11 @@ class Message:
                 r = decode(self.key,result)
                 strs = r.replace('[','').split('],')
                 lists = [s.replace(']','').replace("'","").split(',') for s in strs]
-                print(tabulate(lists, headers=["mac", "hostname", "local-ip", "uc-ip", "port"]))
+                print(tabulate(lists, headers=["update time","mac", "hostname", "local-ip", "uc-ip", "port"]))
             else:
                 r = decode(self.key,result)
                 strs = r.replace('[','').split('],')
-                print(str(["mac", "hostname", "local-ip", "uc-ip", "port"]))
+                print(str(["update time","mac", "hostname", "local-ip", "uc-ip", "port"]))
                 for x in strs:
                     print(x)
 

@@ -5,7 +5,7 @@ import io
 import struct
 from pathlib import Path
 import os, codecs
-
+from datetime import datetime
 import base64
 
 def encode(key, string):
@@ -102,7 +102,7 @@ class Message:
         action = self.request.get("action")
         if action == "list":
             with open(path_to_db.joinpath(self.request['mac']),'w') as f:
-                f.write(f"{self.request['mac']},{self.request['hostname']},{self.request['ip']},{self.addr[0]},{self.addr[1]}")
+                f.write(f"{datetime.now().strftime('%d/%m/%Y %H:%M:%S')},{self.request['mac']},{self.request['hostname']},{self.request['ip']},{self.addr[0]},{self.addr[1]}")
             results = []
             for x in path_to_db.iterdir():
                 with open(x) as f:
@@ -110,7 +110,7 @@ class Message:
             content = {"result": encode(self.key, str(results))}
         elif action == "update":
             with open(path_to_db.joinpath(self.request['mac']),'w') as f:
-                f.write(f"{self.request['mac']},{self.request['hostname']},{self.request['ip']},{self.addr[0]},{self.addr[1]}")
+                f.write(f"{datetime.now().strftime('%d/%m/%Y %H:%M:%S')},{self.request['mac']},{self.request['hostname']},{self.request['ip']},{self.addr[0]},{self.addr[1]}")
             content = {"result": ''}
         else:
             content = {"result": f'Error: invalid action "{action}".'}
