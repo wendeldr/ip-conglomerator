@@ -3,13 +3,26 @@ import selectors
 import json
 import io
 import struct
+from pathlib import Path
+import os, codecs
 
-request_search = {
-    "morpheus": "Follow the white rabbit. \U0001f430",
-    "ring": "In the caves beneath the Misty Mountains. \U0001f48d",
-    "\U0001f436": "\U0001f43e Playing ball! \U0001f3d0",
-}
+def encrypt(plaintext, key):
+	print ("[+] -------- Encryption --------")
+	print ("[+] Key: "+str(codecs.encode(key, 'hex')))
+	encrypted = ""
 
+	for i in range(len(plaintext)):
+		c = ord(plaintext[i]) ^ key[i]
+		d = "{:02x}".format(c)
+		#print ("i:"+str(i)+" P: "+str(plaintext[i])+" K: "+str(key[i])+" C:"+str(c)+" D:"+str(d))
+		encrypted += d
+
+	print ("[+] Encrypted string: "+encrypted)
+	return encrypted
+
+path_to_db = Path('/home/dan/Documents/ips')
+path_to_db.mkdir(parents=True, exist_ok=True)
+otp = 'apiuh2trf9q328ta089ofhnq23olputfbnepoa8iuhfnoq3pw84uvbnq389opun3qp098unhesap9ohunjoai8w4bfq3p8iufyhbnsd8iuhbae9o8ew4h9o83qa7hbnq39o8inbq329o8bnlou8ibn'
 
 class Message:
     def __init__(self, selector, sock, addr):
@@ -91,10 +104,16 @@ class Message:
     def _create_response_json_content(self):
         action = self.request.get("action")
         if action == "list":
-            query = self.request.get("value")
-            answer = request_search.get(query) or f'No match for "{query}".'
-            content = {"result": answer}
+            with open(path_to_db.joinpath(self.request['mac']),'w') as f:
+                f.write(f"{self.request['mac']},{self.request['hostname']},{self.request['ip']},{self.addr[0]},{self.addr[1]}")
+            results = []
+            for x in path_to_db.iterdir():
+                with open(x) as f:
+                    results.append([f.read()])
+            content = {"result": encrypt(str(results), otp)}
         elif action == "update":
+            with open(path_to_db.joinpath(self.request['mac']),'w') as f:
+                f.write(f"{self.request['mac']},{self.request['hostname']},{self.request['ip']},{self.addr[0]},{self.addr[1]}")
             a=1
         else:
             content = {"result": f'Error: invalid action "{action}".'}
