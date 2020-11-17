@@ -39,7 +39,6 @@ if len(sys.argv) < 3 or len(sys.argv) > 6:
 
 
 host, port, password = sys.argv[1], int(sys.argv[2]), sys.argv[3]
-print(password)
 if len(sys.argv) == 5:
     request = create_request(sys.argv[4])
 else:
